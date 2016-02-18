@@ -1,0 +1,31 @@
+{
+  "name": "williamgrant/Planxty",
+  "description": "A very simple static site generator",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "William Grant-Buckley",
+      "email": "hello@william.scot"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Planxty\\": "src"
+    }
+  },
+  "require": {
+    "codegyre/robo": "^0.6.0",
+    "twig/twig": "^1.24",
+    "symfony/console": "~2.5",
+    "symfony/yaml": "~2.5",
+    "pimple/pimple": "^3.0",
+    "evert/sitemap-php": "^1.2",
+    "suin/php-rss-writer": "^1.3",
+    "mnapoli/front-yaml": "^1.5",
+    "illuminate/support": "^5.2"
+  },
+  "bin": [
+    "bin/static"
+  ]
+}

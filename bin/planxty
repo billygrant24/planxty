@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+
+use Robo\Runner;
+
+if (strpos(basename(__FILE__), 'phar')) {
+    require_once 'phar://robo.phar/vendor/autoload.php';
+} else {
+    if (file_exists(getcwd() . '/vendor/autoload.php')) {
+        require_once getcwd() . '/vendor/autoload.php';
+    } elseif (file_exists(getcwd() . '/../../autoload.php')) {
+        require_once getcwd() . '/../../autoload.php';
+    } else {
+        require_once 'phar://robo.phar/vendor/autoload.php';
+    }
+}
+
+$runner = new Runner('PlanxtyFile', 'PlanxtyFile.php');
+$runner->execute();
