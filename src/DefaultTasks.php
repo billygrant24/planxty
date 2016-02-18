@@ -41,10 +41,10 @@ class DefaultTasks extends Tasks
 
         $this->printTaskSuccess('Congratulations, your build was successful!');
 
-        if ($opts['serve']) {
+        if ($opts['play']) {
             $this->play();
         }
-        if ($opts['watch']) {
+        if ($opts['listen']) {
             $this->listen();
         }
     }
