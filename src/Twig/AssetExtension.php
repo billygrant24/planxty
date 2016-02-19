@@ -15,7 +15,7 @@ class AssetExtension extends Twig_Extension
     {
         return [
             new Twig_SimpleFilter('asset', function ($path) {
-                return '/dist/' . ltrim($path, '/');
+                return '/' . ltrim($path, '/');
             }),
         ];
     }

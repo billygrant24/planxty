@@ -109,7 +109,7 @@ class DefaultTasks extends Tasks
 
         $this
             ->taskBuildAssets($config->get('paths.assets'))
-            ->target($this->buildDir . '/dist')
+            ->target($this->buildDir)
             ->run();
     }
 

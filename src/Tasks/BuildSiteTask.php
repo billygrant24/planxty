@@ -12,6 +12,9 @@ class BuildSiteTask implements TaskInterface
      */
     protected $container;
 
+    /**
+     * @var \Illuminate\Support\Collection
+     */
     protected $content;
 
     public function __construct($content)
