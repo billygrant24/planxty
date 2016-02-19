@@ -32,8 +32,16 @@ class ContentRepository
             $twigTemplate = twig_template_from_string($twig, file_get_contents($file->getPathName()));
             $page = collect($yaml->parse($twigTemplate->render(compact('config'))));
 
-            if ($body = $page->get('body')) {
-                $page->put('body', $markdown->parse($body));
+            $page->put('date', strtotime($page->get('date', 'now')));
+            $page->put('date_updated', strtotime($page->get('date_updated', $page->get('date'))));
+            $page->put('type', $page->get('type', $config->get('default_type')));
+            $page->put('layout', $page->get('layout', $config->get('types.' . $page->get('type') . '.layout')));
+            $page->put('body', $markdown->parse($page->get('body', '')));
+
+            if ($uri = $page->get('uri')) {
+                $page->put('uri', '/' . trim($uri, '/'));
+            } else {
+                $page->put('uri', '/' . str_replace('.yml', '.html', $file->getRelativePathname()));
             }
 
             if ($blocks = $page->get('blocks')) {
@@ -46,15 +54,9 @@ class ContentRepository
                 });
             }
 
-            if ($uri = $page->get('uri')) {
-                $page->put('uri', '/' . trim($uri, '/'));
-            } else {
-                $page->put('uri', '/' . str_replace('.yml', '.html', $file->getRelativePathname()));
-            }
-
             $content->push($page);
         }
 
-        return $content;
+        return $content->sortByDesc('date');
     }
 }

@@ -88,10 +88,10 @@ class BuildSiteTask implements TaskInterface
     {
         $pagination = collect($page->get('pagination'));
 
-        $type = $pagination->get('use', true);
+        $type = $pagination->get('from');
         $size = $pagination->get('size', null);
 
-        $scopedContent = $this->content->where('layout', $type);
+        $scopedContent = $this->content->where('type', $type);
         $contentCount = $scopedContent->count();
         $pageCount = ceil($contentCount / ($size ? $size : 1));
 
