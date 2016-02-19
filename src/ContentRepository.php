@@ -1,7 +1,6 @@
 <?php
 namespace Planxty;
 
-use Mni\FrontYAML\Bridge\Parsedown\ParsedownParser;
 use Pimple\Container;
 
 class ContentRepository
@@ -15,49 +14,40 @@ class ContentRepository
     {
         $config = $this->container['config'];
         $finder = $this->container['finder'];
-        $parser = $this->container['parser'];
+        $markdown = $this->container['markdown'];
+        $yaml = $this->container['yaml'];
         $twig = $this->container['twig'];
 
-        $content = collect([]);
+        $finder->files()->in($config->get('paths.content'))->name('*.yml');
 
-        // Parse all documents in the content directory
-        $finder->files()->in($config->get('paths.content'))->name('*.md');
+        $content = collect([]);
         foreach ($finder as $file) {
             $twigTemplate = twig_template_from_string($twig, file_get_contents($file->getPathName()));
-            $parsedFile = $parser->parse($twigTemplate->render(compact('config')));
+            $page = collect($yaml->parse($twigTemplate->render(compact('config'))));
 
-            $meta = $parsedFile->getYAML();
-            $meta['body'] = $parsedFile->getContent();
-            $meta['blocks'] = $this->parseBlocks($meta);
-
-            if (isset($meta['uri'])) {
-                $meta['uri'] = '/' . trim($meta['uri'], '/');
-            } else {
-                $meta['uri'] = '/' . str_replace('.md', '.html', $file->getRelativePathname());
+            if ($body = $page->get('body')) {
+                $page->put('body', $markdown->parse($body));
             }
 
-            $content->push($meta);
+            if ($blocks = $page->get('blocks')) {
+                collect($blocks)->map(function ($block) use ($markdown) {
+                    $block = collect($block);
+
+                    if ($blockBody = $block->get('body')) {
+                        $block->put('bpdy', $markdown->parse($blockBody));
+                    }
+                });
+            }
+
+            if ($uri = $page->get('uri')) {
+                $page->put('uri', '/' . trim($uri, '/'));
+            } else {
+                $page->put('uri', '/' . str_replace('.md', '.html', $file->getRelativePathname()));
+            }
+
+            $content->push($page);
         }
 
         return $content;
-    }
-
-    /**
-     * @param $layoutData
-     *
-     * @return mixed
-     */
-    protected function parseBlocks($layoutData)
-    {
-        $blocks = isset($layoutData['blocks']) ? $layoutData['blocks'] : [];
-        $parsedown = new ParsedownParser();
-
-        foreach ($blocks as $name => $block) {
-            if (isset($block['body'])) {
-                $blocks[$name]['body'] = $parsedown->parse($block['body']);
-            }
-        }
-
-        return $blocks;
     }
 }
