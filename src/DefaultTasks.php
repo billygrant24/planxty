@@ -44,6 +44,7 @@ class DefaultTasks extends Tasks
         if ($opts['play']) {
             $this->play();
         }
+
         if ($opts['listen']) {
             $this->listen();
         }

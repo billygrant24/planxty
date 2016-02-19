@@ -34,7 +34,7 @@ class ContentRepository
                     $block = collect($block);
 
                     if ($blockBody = $block->get('body')) {
-                        $block->put('bpdy', $markdown->parse($blockBody));
+                        $block->put('body', $markdown->parse($blockBody));
                     }
                 });
             }
