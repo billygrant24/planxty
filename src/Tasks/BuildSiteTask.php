@@ -33,20 +33,18 @@ class BuildSiteTask implements TaskInterface
         $fs = $this->container['fs'];
         $twig = $this->container['twig'];
 
-        foreach ($this->content as $data) {
-            $path = rtrim($this->target, '/') . '/' . $data['uri'];
+        foreach ($this->content as $page) {
+            $path = rtrim($this->target, '/') . '/' . $page->get('uri');
+            $twigData = array_merge([
+                'categories' => $this->content->pluck('category')->unique()->filter(),
+                'config' => $config,
+                'content' => $this->content,
+                'tags' => $this->content->pluck('tags')->flatten()->values()->unique()->filter(),
+            ], [
+                'page' => $page,
+            ]);
 
-            $fs->dumpFile(
-                $path,
-                $twig->render($data['layout'] . '.twig', array_merge([
-                    'categories' => $this->content->pluck('category')->unique()->filter(),
-                    'config' => $config,
-                    'content' => $this->content,
-                    'tags' => $this->content->pluck('tags')->flatten()->values()->unique()->filter(),
-                ], [
-                    'page' => $data,
-                ]))
-            );
+            $fs->dumpFile($path, $twig->render($page->get('layout') . '.twig', $twigData));
         }
 
         return Result::success($this, 'Generated static HTML');

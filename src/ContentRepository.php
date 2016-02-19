@@ -42,7 +42,7 @@ class ContentRepository
             if ($uri = $page->get('uri')) {
                 $page->put('uri', '/' . trim($uri, '/'));
             } else {
-                $page->put('uri', '/' . str_replace('.md', '.html', $file->getRelativePathname()));
+                $page->put('uri', '/' . str_replace('.yml', '.html', $file->getRelativePathname()));
             }
 
             $content->push($page);
