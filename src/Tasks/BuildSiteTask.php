@@ -1,6 +1,7 @@
 <?php
 namespace Planxty\Tasks;
 
+use Illuminate\Support\Collection;
 use Planxty\ContainerFactory;
 use Robo\Contract\TaskInterface;
 use Robo\Result;
@@ -17,12 +18,20 @@ class BuildSiteTask implements TaskInterface
      */
     protected $content;
 
-    public function __construct($content)
+    /**
+     * @param \Illuminate\Support\Collection $content
+     */
+    public function __construct(Collection $content)
     {
         $this->container = ContainerFactory::getStaticInstance();
         $this->content = $content;
     }
 
+    /**
+     * @param string $target
+     *
+     * @return $this
+     */
     public function target($target)
     {
         $this->target = $target;
@@ -30,6 +39,9 @@ class BuildSiteTask implements TaskInterface
         return $this;
     }
 
+    /**
+     * @return \Robo\Result
+     */
     public function run()
     {
         $config = $this->container['config'];
@@ -53,7 +65,11 @@ class BuildSiteTask implements TaskInterface
         return Result::success($this, 'Generated static HTML');
     }
 
-    private function writeFile($page, $data)
+    /**
+     * @param \Illuminate\Support\Collection $page
+     * @param array                          $data
+     */
+    protected function writeFile(Collection $page, array $data)
     {
         $fs = $this->container['fs'];
         $twig = $this->container['twig'];
@@ -64,7 +80,11 @@ class BuildSiteTask implements TaskInterface
         );
     }
 
-    private function handlePagination($page, $twigData)
+    /**
+     * @param \Illuminate\Support\Collection $page
+     * @param array                          $twigData
+     */
+    protected function handlePagination(Collection $page, array $twigData)
     {
         $pagination = collect($page->get('pagination'));
 
@@ -77,10 +97,11 @@ class BuildSiteTask implements TaskInterface
 
         $getPagedPath = function ($pageNumber) use ($page) {
             $uri = $page->get('uri');
+
             return $pageNumber > 1 ? str_replace('.html', '-' . $pageNumber . '.html', $uri) : $uri;
         };
 
-        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++ ) {
+        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
             $page->put('uri', $getPagedPath($pageNumber));
 
             $pagination->put('items', $scopedContent->forPage($pageNumber, $size));
@@ -91,7 +112,7 @@ class BuildSiteTask implements TaskInterface
             $pagination->put('previous', $pageNumber > 1 ? $pageNumber - 1 : null);
             $pagination->put('previous_uri', $pageNumber > 1 ? $getPagedPath($pageNumber - 1) : null);
             $pagination->put('first', 1);
-            $pagination->put('first_uri', $getPagedPath(1));
+            $pagination->put('first_uri', $page->get('uri'));
             $pagination->put('last', $pageCount);
             $pagination->put('last_uri', $getPagedPath($pageCount));
             $pagination->put('total', $contentCount);

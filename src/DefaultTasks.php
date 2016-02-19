@@ -1,6 +1,7 @@
 <?php
 namespace Planxty;
 
+use Illuminate\Support\Collection;
 use Planxty\Concerns\BuildsApi;
 use Planxty\Concerns\BuildsAssets;
 use Planxty\Concerns\BuildsRss;
@@ -18,6 +19,9 @@ class DefaultTasks extends Tasks
     use BuildsSitemap;
     use TaskIO;
 
+    /**
+     * @var string
+     */
     protected $buildDir = '';
 
     public function __construct()
@@ -26,6 +30,9 @@ class DefaultTasks extends Tasks
         $this->buildDir = $this->container['config']->get('paths.build');
     }
 
+    /**
+     * @param array $opts
+     */
     public function compose($opts = ['play|p' => false, 'listen|l' => false])
     {
         $this->printTaskInfo('Starting build process');
@@ -113,7 +120,10 @@ class DefaultTasks extends Tasks
             ->run();
     }
 
-    public function composeApi($content = null)
+    /**
+     * @param \Illuminate\Support\Collection|null $content
+     */
+    public function composeApi(Collection $content = null)
     {
         $config = $this->container['config'];
         $content = $content ? $content : $this->container['content']->collect();
@@ -125,7 +135,10 @@ class DefaultTasks extends Tasks
             ->run();
     }
 
-    public function composeRss($content = null)
+    /**
+     * @param \Illuminate\Support\Collection|null $content
+     */
+    public function composeRss(Collection $content = null)
     {
         $config = $this->container['config'];
         $content = $content ? $content : $this->container['content']->collect();
@@ -137,7 +150,10 @@ class DefaultTasks extends Tasks
             ->run();
     }
 
-    public function composeSitemap($content = null)
+    /**
+     * @param \Illuminate\Support\Collection|null $content
+     */
+    public function composeSitemap(Collection $content = null)
     {
         $config = $this->container['config'];
         $content = $content ? $content : $this->container['content']->collect();

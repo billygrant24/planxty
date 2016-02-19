@@ -1,6 +1,7 @@
 <?php
 namespace Planxty\Tasks;
 
+use Illuminate\Support\Collection;
 use Planxty\ContainerFactory;
 use Robo\Contract\TaskInterface;
 use Robo\Result;
@@ -13,7 +14,7 @@ class BuildApiTask implements TaskInterface
     protected $container;
 
     /**
-     * @var Illuminate\Support\Collection
+     * @var \Illuminate\Support\Collection
      */
     protected $content;
 
@@ -22,19 +23,32 @@ class BuildApiTask implements TaskInterface
      */
     protected $target;
 
+    /**
+     * @param string $name
+     */
     public function __construct($name)
     {
         $this->container = ContainerFactory::getStaticInstance();
         $this->name = $name;
     }
 
-    public function with($content)
+    /**
+     * @param \Illuminate\Support\Collection $content
+     *
+     * @return $this
+     */
+    public function with(Collection $content)
     {
         $this->content = $content;
 
         return $this;
     }
 
+    /**
+     * @param string $target
+     *
+     * @return $this
+     */
     public function target($target)
     {
         $this->target = $target;
@@ -42,6 +56,9 @@ class BuildApiTask implements TaskInterface
         return $this;
     }
 
+    /**
+     * @return \Robo\Result
+     */
     public function run()
     {
         $fs = $this->container['fs'];
@@ -52,7 +69,10 @@ class BuildApiTask implements TaskInterface
             'tags' => $this->content->pluck('tags')->flatten()->values()->unique()->filter(),
         ])->toJson();
 
-        $fs->dumpFile(rtrim($this->target, '/') . '/' . trim($this->name, '/'), $json);
+        $fs->dumpFile(
+            implode('/', [rtrim($this->target, '/'), trim($this->name, '/')]),
+            $json
+        );
 
         return Result::success($this, 'Added API endpoint');
     }

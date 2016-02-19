@@ -5,11 +5,18 @@ use Pimple\Container;
 
 class ContentRepository
 {
+    /**
+     * @param \Pimple\Container $container
+     */
     public function __construct(Container $container)
     {
         $this->container = $container;
     }
 
+    /**
+     * @return \Illuminate\Support\Collection
+     * @throws \Exception
+     */
     public function collect()
     {
         $config = $this->container['config'];

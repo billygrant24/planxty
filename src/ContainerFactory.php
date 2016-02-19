@@ -1,13 +1,13 @@
 <?php
 namespace Planxty;
 
-use Mni\FrontYAML\Bridge\Parsedown\ParsedownParser;
-use Mni\FrontYAML\Bridge\Symfony\SymfonyYAMLParser;
+use Parsedown;
 use Pimple\Container;
 use Planxty\Twig\AssetExtension;
 use Planxty\Twig\IlluminateStringExtension;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Yaml;
 use Twig_Environment;
 use Twig_Extension_StringLoader;
@@ -34,11 +34,11 @@ final class ContainerFactory
         });
 
         $container['markdown'] = function () {
-            return new ParsedownParser();
+            return new Parsedown();
         };
 
         $container['yaml'] = function () {
-            return new SymfonyYAMLParser();
+            return new Parser();
         };
 
         $container['twig'] = function ($c) {

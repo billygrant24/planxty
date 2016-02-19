@@ -1,6 +1,7 @@
 <?php
 namespace Planxty\Tasks;
 
+use Illuminate\Support\Collection;
 use Planxty\ContainerFactory;
 use Robo\Contract\TaskInterface;
 use Robo\Result;
@@ -16,7 +17,7 @@ class BuildRssTask implements TaskInterface
     protected $container;
 
     /**
-     * @var Illuminate\Support\Collection
+     * @var \Illuminate\Support\Collection
      */
     protected $content;
 
@@ -25,19 +26,32 @@ class BuildRssTask implements TaskInterface
      */
     protected $target;
 
+    /**
+     * @param string $name
+     */
     public function __construct($name)
     {
         $this->container = ContainerFactory::getStaticInstance();
         $this->name = $name;
     }
 
-    public function with($content)
+    /**
+     * @param \Illuminate\Support\Collection $content
+     *
+     * @return $this
+     */
+    public function with(Collection $content)
     {
         $this->content = $content;
 
         return $this;
     }
 
+    /**
+     * @param string $target
+     *
+     * @return $this
+     */
     public function target($target)
     {
         $this->target = $target;
@@ -45,6 +59,9 @@ class BuildRssTask implements TaskInterface
         return $this;
     }
 
+    /**
+     * @return \Robo\Result
+     */
     public function run()
     {
         $config = $this->container['config'];
@@ -70,16 +87,19 @@ class BuildRssTask implements TaskInterface
         foreach ($this->content as $page) {
             $item = new Item();
             $item
-                ->title($page['title'])
+                ->title($page->get('title'))
                 ->description("<div>Blog body</div>")
-                ->url($page['uri'])
+                ->url($page->get('uri'))
                 ->pubDate(strtotime('Tue, 21 Aug 2012 19:50:37 +0900'))
-                ->guid($page['uri'], true)
+                ->guid($page->get('uri'), true)
                 ->appendTo($channel);
         }
 
         // Write out the RSS feed
-        $fs->dumpFile(rtrim($this->target, '/') . '/' . trim($this->name, '/'), $feed);
+        $fs->dumpFile(
+            implode('/', [rtrim($this->target, '/'), trim($this->name, '/')]),
+            $feed
+        );
 
         return Result::success($this, 'Added RSS feed');
     }

@@ -2,11 +2,14 @@
 namespace Planxty\Tasks;
 
 use Planxty\ContainerFactory;
+use Robo\Common\TaskIO;
 use Robo\Contract\TaskInterface;
 use Robo\Result;
 
 class BuildAssetsTask implements TaskInterface
 {
+    use TaskIO;
+
     /**
      * @var \Pimple\Container
      */
@@ -22,12 +25,20 @@ class BuildAssetsTask implements TaskInterface
      */
     protected $target;
 
+    /**
+     * @param string $path
+     */
     public function __construct($path)
     {
         $this->container = ContainerFactory::getStaticInstance();
         $this->path = $path;
     }
 
+    /**
+     * @param string $target
+     *
+     * @return $this
+     */
     public function target($target)
     {
         $this->target = $target;
@@ -35,6 +46,9 @@ class BuildAssetsTask implements TaskInterface
         return $this;
     }
 
+    /**
+     * @return \Robo\Result
+     */
     public function run()
     {
         $finder = $this->container['finder'];
@@ -50,7 +64,7 @@ class BuildAssetsTask implements TaskInterface
         foreach ($finder as $file) {
             $fs->copy(
                 $file->getPathName(),
-                rtrim($this->target, '/') . '/' . trim($file->getRelativePathname(), '/')
+                implode('/', [rtrim($this->target, '/'), trim($file->getRelativePathname(), '/')])
             );
         }
 

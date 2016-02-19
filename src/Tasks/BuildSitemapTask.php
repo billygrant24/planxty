@@ -1,23 +1,11 @@
 <?php
 namespace Planxty\Tasks;
 
+use Illuminate\Support\Collection;
 use Planxty\ContainerFactory;
 use Robo\Contract\TaskInterface;
 use Robo\Result;
 use SitemapPHP\Sitemap;
-
-trait BuildsSitemap
-{
-    /**
-     * @param string $path
-     *
-     * @return \Planxty\Tasks\BuildSitemapTask
-     */
-    public function taskBuildSitemap($path)
-    {
-        return new BuildSitemapTask($path);
-    }
-}
 
 class BuildSitemapTask implements TaskInterface
 {
@@ -27,7 +15,7 @@ class BuildSitemapTask implements TaskInterface
     protected $container;
 
     /**
-     * @var Illuminate\Support\Collection
+     * @var \Illuminate\Support\Collection
      */
     protected $content;
 
@@ -36,26 +24,42 @@ class BuildSitemapTask implements TaskInterface
      */
     protected $target;
 
+    /**
+     * @param string $name
+     */
     public function __construct($name)
     {
         $this->container = ContainerFactory::getStaticInstance();
         $this->name = $name;
     }
 
-    public function with($content)
+    /**
+     * @param \Illuminate\Support\Collection $content
+     *
+     * @return $this
+     */
+    public function with(Collection $content)
     {
         $this->content = $content;
 
         return $this;
     }
 
-    public function target($target)
+    /**
+     * @param string $target
+     *
+     * @return $this
+     */
+    public function target($target )
     {
         $this->target = $target;
 
         return $this;
     }
 
+    /**
+     * @return \Robo\Result
+     */
     public function run()
     {
         $config = $this->container['config'];
@@ -66,10 +70,9 @@ class BuildSitemapTask implements TaskInterface
             ->setPath(rtrim($this->target, '/') . '/')
             ->setFilename($this->name);
 
-
         // Add each page
         foreach ($this->content as $page) {
-            $sitemap->addItem($page['uri']);
+            $sitemap->addItem($page->get('uri'));
         }
 
         // Finalise the generated sitemap
