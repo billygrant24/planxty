@@ -44,7 +44,7 @@ class BuildSiteTask implements TaskInterface
                 'page' => $page,
             ]);
 
-            $fs->dumpFile($path, $twig->render($page->get('layout') . '.twig', $twigData));
+            $fs->dumpFile($path, $twig->render($page->get('layout'), $twigData));
         }
 
         return Result::success($this, 'Generated static HTML');
