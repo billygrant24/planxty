@@ -84,7 +84,14 @@ class DefaultTasks extends Tasks
 
     public function clean()
     {
-        $this->taskCleanDir($this->buildDir)->run();
+        $fs = $this->container['fs'];
+
+        if ($fs->exists($this->buildDir)) {
+            $this->taskCleanDir($this->buildDir)->run();
+        } else {
+            $fs->mkdir($this->buildDir);
+            $this->say('Could find build directory. Initialised on at: ' . $this->buildDir);
+        }
     }
 
     protected function composeHtml()
