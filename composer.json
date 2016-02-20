@@ -17,15 +17,15 @@
   "require": {
     "codegyre/robo": "^0.6.0",
     "erusev/parsedown": "~1.0",
-    "evert/sitemap-php": "^1.2",
     "illuminate/support": "^5.2",
     "pimple/pimple": "^3.0",
-    "suin/php-rss-writer": "^1.3",
     "symfony/console": "~2.5",
     "symfony/yaml": "~2.5",
     "twig/twig": "^1.24"
   },
-  "bin": [
-    "bin/planxty"
-  ]
+  "suggest": {
+    "williamgrant/planxty-json": "Add a JSON endpoint to a Planxty site",
+    "williamgrant/planxty-rss": "Add an RSS feed to a Planxty site",
+    "williamgrant/planxty-sitemap": "Add a sitemap to a Planxty site"
+  }
 }

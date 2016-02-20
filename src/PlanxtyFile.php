@@ -1,22 +1,15 @@
 <?php
 namespace Planxty;
 
-use Illuminate\Support\Collection;
-use Planxty\Concerns\BuildsApi;
-use Planxty\Concerns\BuildsAssets;
-use Planxty\Concerns\BuildsRss;
-use Planxty\Concerns\BuildsSite;
-use Planxty\Concerns\BuildsSitemap;
+use Planxty\Tasks\Concerns\BuildsAssets;
+use Planxty\Tasks\Concerns\BuildsSite;
 use Robo\Common\TaskIO;
 use Robo\Tasks;
 
-class DefaultTasks extends Tasks
+class PlanxtyFile extends Tasks
 {
-    use BuildsApi;
     use BuildsAssets;
-    use BuildsRss;
     use BuildsSite;
-    use BuildsSitemap;
     use TaskIO;
 
     /**
@@ -26,7 +19,7 @@ class DefaultTasks extends Tasks
 
     public function __construct()
     {
-        $this->container = ContainerFactory::getStaticInstance();
+        $this->container = ContainerFactory::newInstance();
         $this->buildDir = $this->container['config']->get('paths.build');
     }
 
@@ -96,25 +89,12 @@ class DefaultTasks extends Tasks
 
     protected function composeHtml()
     {
-        $config = $this->container['config'];
         $content = $this->container['content']->collect();
 
         $this
             ->taskBuildSite($content)
             ->target($this->buildDir)
             ->run();
-
-        if ($config->get('sitemap.enabled')) {
-            $this->composeSitemap($content);
-        }
-
-        if ($config->get('rss.enabled')) {
-            $this->composeRss($content);
-        }
-
-        if ($config->get('api.enabled')) {
-            $this->composeApi($content);
-        }
     }
 
     public function composeAssets()
@@ -123,51 +103,6 @@ class DefaultTasks extends Tasks
 
         $this
             ->taskBuildAssets($config->get('paths.assets'))
-            ->target($this->buildDir)
-            ->run();
-    }
-
-    /**
-     * @param \Illuminate\Support\Collection|null $content
-     */
-    public function composeApi(Collection $content = null)
-    {
-        $config = $this->container['config'];
-        $content = $content ? $content : $this->container['content']->collect();
-
-        $this
-            ->taskBuildApi($config->get('api.filename') . '.json')
-            ->with($content)
-            ->target($this->buildDir)
-            ->run();
-    }
-
-    /**
-     * @param \Illuminate\Support\Collection|null $content
-     */
-    public function composeRss(Collection $content = null)
-    {
-        $config = $this->container['config'];
-        $content = $content ? $content : $this->container['content']->collect();
-
-        $this
-            ->taskBuildRss($config->get('rss.filename') . '.xml')
-            ->with($content)
-            ->target($this->buildDir)
-            ->run();
-    }
-
-    /**
-     * @param \Illuminate\Support\Collection|null $content
-     */
-    public function composeSitemap(Collection $content = null)
-    {
-        $config = $this->container['config'];
-        $content = $content ? $content : $this->container['content']->collect();
-
-        $this
-            ->taskBuildSitemap($config->get('sitemap.filename'))
-            ->with($content)
             ->target($this->buildDir)
             ->run();
     }

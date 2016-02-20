@@ -23,7 +23,7 @@ class BuildSiteTask implements TaskInterface
      */
     public function __construct(Collection $content)
     {
-        $this->container = ContainerFactory::getStaticInstance();
+        $this->container = ContainerFactory::newInstance();
         $this->content = $content;
     }
 

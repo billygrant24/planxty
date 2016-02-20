@@ -3,11 +3,11 @@ namespace Planxty;
 
 use Parsedown;
 use Pimple\Container;
-use Planxty\Twig\AssetExtension;
-use Planxty\Twig\IlluminateStringExtension;
+use Planxty\Content\Parser;
+use Planxty\Content\Repository;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Yaml\Parser;
+use Symfony\Component\Yaml\Parser as YamlParser;
 use Symfony\Component\Yaml\Yaml;
 use Twig_Environment;
 use Twig_Extension_StringLoader;
@@ -15,18 +15,22 @@ use Twig_Loader_Filesystem;
 
 final class ContainerFactory
 {
-    public static function getStaticInstance()
+    public static function newInstance()
     {
         $container = new Container();
 
         $container['config'] = function () {
-            $configFile = str_replace('%base_path%', getcwd(), file_get_contents(getcwd() . '/config.yml'));
+            $configFile = str_replace(
+                '%base_path%',
+                getcwd(),
+                file_get_contents(getcwd() . '/config.yml')
+            );
 
             return collect(array_dot(Yaml::parse($configFile)));
         };
 
         $container['content'] = $container->factory(function ($c) {
-            return new ContentRepository($c);
+            return new Repository($c);
         });
 
         $container['fs'] = $container->factory(function ($c) {
@@ -38,7 +42,11 @@ final class ContainerFactory
         };
 
         $container['yaml'] = function () {
-            return new Parser();
+            return new YamlParser();
+        };
+
+        $container['parser'] = function ($c) {
+            return new Parser($c['config'], $c['twig'], $c['yaml'], $c['markdown']);
         };
 
         $container['twig'] = function ($c) {
@@ -52,8 +60,6 @@ final class ContainerFactory
             $twig->getLoader()->addPath($c['config']->get('paths.content'));
 
             // Add Twig extensions
-            $twig->addExtension(new AssetExtension());
-            $twig->addExtension(new IlluminateStringExtension());
             $twig->addExtension(new Twig_Extension_StringLoader());
 
             return $twig;

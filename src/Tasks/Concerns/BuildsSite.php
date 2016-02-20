@@ -1,5 +1,5 @@
 <?php
-namespace Planxty\Concerns;
+namespace Planxty\Tasks\Concerns;
 
 use Planxty\Tasks\BuildSiteTask;
 

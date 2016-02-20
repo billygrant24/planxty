@@ -30,7 +30,7 @@ class BuildAssetsTask implements TaskInterface
      */
     public function __construct($path)
     {
-        $this->container = ContainerFactory::getStaticInstance();
+        $this->container = ContainerFactory::newInstance();
         $this->path = $path;
     }
 
