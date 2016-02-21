@@ -60,6 +60,19 @@ class Parser
         // Transform markdown fields to HTML
         $this->transformMarkdown($page);
 
+        // Parse blocks
+        if ($blocks = $page->get('blocks')) {
+            array_walk_recursive($blocks, function(&$block, $key) {
+                if (str_contains($key, '.md') || $key === 'body') {
+                    $block = $this->markdown->parse($block);
+                }
+
+                return $block;
+            });
+
+            $page->put('blocks', $blocks);
+        }
+
         return $page;
     }
 

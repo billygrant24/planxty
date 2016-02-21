@@ -44,12 +44,20 @@ class BuildSiteTask implements TaskInterface
      */
     public function run()
     {
-        $config = $this->container['config'];
+        $config = function () {
+            $output = array();
+
+            foreach ($this->container['config'] as $key => $value) {
+                array_set($output, $key, $value);
+            }
+
+            return $output;
+        };
 
         foreach ($this->content as $page) {
             $twigData = array_merge([
                 'categories' => $this->content->pluck('category')->unique()->filter(),
-                'config' => $config,
+                'config' => $config(),
                 'content' => $this->content,
                 'tags' => $this->content->pluck('tags')->flatten()->values()->unique()->filter(),
             ], compact('page'));
