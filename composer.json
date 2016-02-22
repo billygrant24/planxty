@@ -11,7 +11,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Planxty\\": "src"
+      "Phabric\\": "src"
     }
   },
   "require": {
@@ -21,11 +21,8 @@
     "pimple/pimple": "^3.0",
     "symfony/console": "~2.5",
     "symfony/yaml": "~2.5",
-    "twig/twig": "^1.24"
-  },
-  "suggest": {
-    "williamgrant/planxty-json": "Add a JSON endpoint to a Planxty site",
-    "williamgrant/planxty-rss": "Add an RSS feed to a Planxty site",
-    "williamgrant/planxty-sitemap": "Add a sitemap to a Planxty site"
+    "twig/twig": "^1.24",
+    "evert/sitemap-php": "^1.2",
+    "suin/php-rss-writer": "^1.3"
   }
 }

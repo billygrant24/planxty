@@ -1,5 +1,5 @@
 <?php
-namespace Planxty;
+namespace Phabric;
 
 use ArrayAccess;
 use Illuminate\Support\Arr;

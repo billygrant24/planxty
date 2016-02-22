@@ -1,12 +1,12 @@
 <?php
-namespace Planxty;
+namespace Phabric;
 
 use Parsedown;
 use Pimple\Container;
-use Planxty\Block\Parser as BlockParser;
-use Planxty\Block\Repository as BlockRepository;
-use Planxty\Content\Parser;
-use Planxty\Content\Repository;
+use Phabric\Block\Parser as BlockParser;
+use Phabric\Block\Repository as BlockRepository;
+use Phabric\Content\Parser;
+use Phabric\Content\Repository;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Parser as YamlParser;

@@ -1,5 +1,5 @@
 <?php
-namespace Planxty;
+namespace Phabric;
 
 use Illuminate\Support\Collection;
 use Parsedown;

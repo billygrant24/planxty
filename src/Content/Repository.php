@@ -1,5 +1,5 @@
 <?php
-namespace Planxty\Content;
+namespace Phabric\Content;
 
 use Pimple\Container;
 

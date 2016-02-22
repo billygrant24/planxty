@@ -1,8 +1,8 @@
 <?php
-namespace Planxty\Content;
+namespace Phabric\Content;
 
 use Illuminate\Support\Collection;
-use Planxty\FileParser;
+use Phabric\FileParser;
 use Symfony\Component\Finder\SplFileInfo;
 
 class Parser

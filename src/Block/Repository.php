@@ -1,5 +1,5 @@
 <?php
-namespace Planxty\Block;
+namespace Phabric\Block;
 
 use Pimple\Container;
 
