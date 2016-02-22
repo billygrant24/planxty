@@ -44,28 +44,16 @@ class BuildSiteTask implements TaskInterface
      */
     public function run()
     {
-        $config = function () {
-            $output = array();
-
-            foreach ($this->container['config'] as $key => $value) {
-                array_set($output, $key, $value);
-            }
-
-            return $output;
-        };
+        dd($this->container['content']->collect());
 
         foreach ($this->content as $page) {
             $twigData = array_merge([
+                'blocks' => $this->container['blocks']->collect(),
                 'categories' => $this->content->pluck('category')->unique()->filter(),
-                'config' => $config(),
+                'config' => $this->container['config'],
                 'content' => $this->content,
                 'tags' => $this->content->pluck('tags')->flatten()->values()->unique()->filter(),
             ], compact('page'));
-
-            if ($page->has('pagination')) {
-                $this->handlePagination($page, $twigData);
-                continue;
-            }
 
             $this->writeFile($page, $twigData);
         }
@@ -75,59 +63,57 @@ class BuildSiteTask implements TaskInterface
 
     /**
      * @param \Illuminate\Support\Collection $page
-     * @param array                          $data
+     * @param array                          $twigData
      */
-    protected function writeFile(Collection $page, array $data)
+    protected function writeFile(Collection $page, array $twigData)
     {
         $fs = $this->container['fs'];
         $twig = $this->container['twig'];
 
-        $fs->dumpFile(
-            rtrim($this->target, '/') . $page->get('uri'),
-            $twig->render($page->get('layout'), $data)
-        );
-    }
+        if ( ! $page->has('pagination')) {
+            $fs->dumpFile(
+                rtrim($this->target, '/') . $page->get('uri'),
+                $twig->render($page->get('layout'), $twigData)
+            );
+        } else {
+            $pagination = collect($page->get('pagination'));
 
-    /**
-     * @param \Illuminate\Support\Collection $page
-     * @param array                          $twigData
-     */
-    protected function handlePagination(Collection $page, array $twigData)
-    {
-        $pagination = collect($page->get('pagination'));
+            $type = $pagination->get('from');
+            $size = $pagination->get('size', null);
 
-        $type = $pagination->get('from');
-        $size = $pagination->get('size', null);
+            $scopedContent = $this->content->where('type', $type);
+            $contentCount = $scopedContent->count();
+            $pageCount = ceil($contentCount / ($size ? $size : 1));
 
-        $scopedContent = $this->content->where('type', $type);
-        $contentCount = $scopedContent->count();
-        $pageCount = ceil($contentCount / ($size ? $size : 1));
+            $getPagedPath = function ($pageNumber) use ($page) {
+                $uri = $page->get('uri');
 
-        $getPagedPath = function ($pageNumber) use ($page) {
-            $uri = $page->get('uri');
+                return $pageNumber > 1 ? str_replace('.html', '-' . $pageNumber . '.html', $uri) : $uri;
+            };
 
-            return $pageNumber > 1 ? str_replace('.html', '-' . $pageNumber . '.html', $uri) : $uri;
-        };
+            for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
+                $page->put('uri', $getPagedPath($pageNumber));
 
-        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
-            $page->put('uri', $getPagedPath($pageNumber));
+                $pagination->put('items', $scopedContent->forPage($pageNumber, $size));
+                $pagination->put('current', $pageNumber);
+                $pagination->put('current_uri', $getPagedPath($pageNumber));
+                $pagination->put('next', $pageNumber < $pageCount ? $pageNumber + 1 : null);
+                $pagination->put('next_uri', $pageNumber < $pageCount ? $getPagedPath($pageNumber + 1) : null);
+                $pagination->put('previous', $pageNumber > 1 ? $pageNumber - 1 : null);
+                $pagination->put('previous_uri', $pageNumber > 1 ? $getPagedPath($pageNumber - 1) : null);
+                $pagination->put('first', 1);
+                $pagination->put('first_uri', $page->get('uri'));
+                $pagination->put('last', $pageCount);
+                $pagination->put('last_uri', $getPagedPath($pageCount));
+                $pagination->put('total', $contentCount);
 
-            $pagination->put('items', $scopedContent->forPage($pageNumber, $size));
-            $pagination->put('current', $pageNumber);
-            $pagination->put('current_uri', $getPagedPath($pageNumber));
-            $pagination->put('next', $pageNumber < $pageCount ? $pageNumber + 1 : null);
-            $pagination->put('next_uri', $pageNumber < $pageCount ? $getPagedPath($pageNumber + 1) : null);
-            $pagination->put('previous', $pageNumber > 1 ? $pageNumber - 1 : null);
-            $pagination->put('previous_uri', $pageNumber > 1 ? $getPagedPath($pageNumber - 1) : null);
-            $pagination->put('first', 1);
-            $pagination->put('first_uri', $page->get('uri'));
-            $pagination->put('last', $pageCount);
-            $pagination->put('last_uri', $getPagedPath($pageCount));
-            $pagination->put('total', $contentCount);
+                $twigData['pagination'] = $pagination;
 
-            $twigData['pagination'] = $pagination;
-
-            $this->writeFile($page, $twigData);
+                $fs->dumpFile(
+                    rtrim($this->target, '/') . $page->get('uri'),
+                    $twig->render($page->get('layout'), $twigData)
+                );
+            }
         }
     }
 }

@@ -3,6 +3,8 @@ namespace Planxty;
 
 use Parsedown;
 use Pimple\Container;
+use Planxty\Block\Parser as BlockParser;
+use Planxty\Block\Repository as BlockRepository;
 use Planxty\Content\Parser;
 use Planxty\Content\Repository;
 use Symfony\Component\Filesystem\Filesystem;
@@ -26,11 +28,15 @@ final class ContainerFactory
                 file_get_contents(getcwd() . '/config.yml')
             );
 
-            return collect(array_dot(Yaml::parse($configFile)));
+            return new Config(Yaml::parse($configFile));
         };
 
         $container['content'] = $container->factory(function ($c) {
             return new Repository($c);
+        });
+
+        $container['blocks'] = $container->factory(function ($c) {
+            return new BlockRepository($c);
         });
 
         $container['fs'] = $container->factory(function ($c) {
@@ -46,7 +52,25 @@ final class ContainerFactory
         };
 
         $container['parser'] = function ($c) {
-            return new Parser($c['config'], $c['twig'], $c['yaml'], $c['markdown']);
+            $parser = new Parser();
+
+            $parser->setConfig($c['config']);
+            $parser->setMarkdown($c['markdown']);
+            $parser->setTwig($c['twig']);
+            $parser->setYaml($c['yaml']);
+
+            return $parser;
+        };
+
+        $container['block_parser'] = function ($c) {
+            $parser = new BlockParser();
+
+            $parser->setConfig($c['config']);
+            $parser->setMarkdown($c['markdown']);
+            $parser->setTwig($c['twig']);
+            $parser->setYaml($c['yaml']);
+
+            return $parser;
         };
 
         $container['twig'] = function ($c) {

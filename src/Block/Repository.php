@@ -1,5 +1,5 @@
 <?php
-namespace Planxty\Content;
+namespace Planxty\Block;
 
 use Pimple\Container;
 
@@ -21,16 +21,19 @@ class Repository
     {
         $config = $this->container['config'];
         $finder = $this->container['finder'];
-        $parser = $this->container['parser'];
+        $parser = $this->container['block_parser'];
 
-        $finder->files()->in($config->get('paths.content'))->name('*.yml');
+        $blocks = collect([]);
 
-        $content = collect([]);
-        foreach ($finder as $file) {
-            $page = $parser->parse($file);
-            $content->put($page->get('uri'), $page);
+        // Make sure we have specified a blocks directory
+        if ($config->has('paths.blocks')) {
+            $finder->files()->in($config->get('paths.blocks'))->name('*.yml');
+
+            foreach ($finder as $file) {
+                $blocks->put($file->getBasename('.yml'), $parser->parse($file));
+            }
         }
 
-        return $content->sortByDesc('date');
+        return $blocks;
     }
 }
