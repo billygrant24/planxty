@@ -44,8 +44,6 @@ class BuildSiteTask implements TaskInterface
      */
     public function run()
     {
-        dd($this->container['content']->collect());
-
         foreach ($this->content as $page) {
             $twigData = array_merge([
                 'blocks' => $this->container['blocks']->collect(),
