@@ -13,5 +13,3 @@ scopes:
     permalink: blog/:category/:title
     sort_by: date
     order: desc
-    filter:
-      status: live

@@ -11,10 +11,27 @@ scopes:
   posts:
     path: posts
     permalink: blog/:category/:title
-    sort_by: date
-    order: desc
-    filter:
-      status: live
+
+# Paths
+# ======
+
+paths:
+
+  root: :root
+  assets: :root/assets
+  blocks: :root/blocks
+  build: :root/_dist
+  content: :root/content
+  layouts: :root/layouts
+
+# Outputs
+# ======
+
+outputs:
+
+  api: index.json
+  rss: rss.xml
+  sitemap: sitemap.xml
 
 # Taxonomies
 # ======

@@ -3,10 +3,10 @@ namespace Phabric\Collection\Block;
 
 use Phabric\Collection\Parser;
 use Phabric\Collection\Repository as RepositoryInterface;
-use Phabric\Collection\SelfParsingRepository;
+use Phabric\Collection\ParsingRepository;
 use Symfony\Component\Finder\Finder;
 
-final class Repository implements RepositoryInterface, SelfParsingRepository
+final class Repository implements RepositoryInterface, ParsingRepository
 {
     use Parser;
 

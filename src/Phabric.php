@@ -1,9 +1,7 @@
 <?php
 namespace Phabric;
 
-use Phabric\Tasks\PackageManagerTasks;
 use Phabric\Tasks\RoboTasks;
-use Phabric\Tasks\ThirdPartyTasks;
 use Robo\Result;
 use SitemapPHP\Sitemap;
 use Suin\RSSWriter\Channel;
@@ -12,9 +10,7 @@ use Suin\RSSWriter\Item;
 
 trait Phabric
 {
-    use PackageManagerTasks;
     use RoboTasks;
-    use ThirdPartyTasks;
 
     public function play()
     {

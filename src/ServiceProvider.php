@@ -5,6 +5,7 @@ use Parsedown;
 use Phabric\Collection\Block\Repository as BlockRepository;
 use Phabric\Collection\Content\Parser;
 use Phabric\Collection\Content\Repository;
+use Phabric\Exception\ConfigurationException;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -22,19 +23,16 @@ final class ServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $pimple)
     {
-        $pimple['config'] = function ($c) {
+        $pimple['config'] = function () {
+            $path = getcwd() . '/config.yml';
 
-            $configFile = 'null: set';
-
-            if ($c['fs']->exists(getcwd() . '/config.yml')) {
-                $configFile = str_replace(
-                    '%base_path%',
-                    getcwd(),
-                    file_get_contents(getcwd() . '/config.yml')
-                );
+            if ( ! file_exists($path)) {
+                return new Config([]);
             }
 
-            return new Config(Yaml::parse($configFile));
+            $file = str_replace(':root', getcwd(), file_get_contents($path));
+
+            return new Config(Yaml::parse($file));
         };
 
         $pimple['content'] = $pimple->factory(function ($c) {

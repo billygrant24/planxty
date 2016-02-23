@@ -6,7 +6,7 @@ use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Parser as Yaml;
 use Twig_Environment;
 
-interface SelfParsingRepository
+interface ParsingRepository
 {
     /**
      * @param \Symfony\Component\Finder\SplFileInfo $file

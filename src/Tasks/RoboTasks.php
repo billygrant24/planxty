@@ -13,4 +13,7 @@ trait RoboTasks
     use \Robo\Task\FileSystem\loadShortcuts;
     use \Robo\Task\Vcs\loadShortcuts;
     use \Robo\Common\TaskIO;
+
+    use PackageManagerTasks;
+    use ThirdPartyTasks;
 }
