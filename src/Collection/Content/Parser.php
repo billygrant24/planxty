@@ -1,13 +1,15 @@
 <?php
-namespace Phabric\Content;
+namespace Phabric\Collection\Content;
 
 use Illuminate\Support\Collection;
-use Phabric\FileParser;
+use Phabric\Collection\Parser as ParserTrait;
 use Symfony\Component\Finder\SplFileInfo;
 
-class Parser
+final class Parser
 {
-    use FileParser;
+    use ParserTrait {
+        parse as parseFile;
+    }
 
     /**
      * @param \Symfony\Component\Finder\SplFileInfo $file
@@ -68,10 +70,30 @@ class Parser
      */
     protected function inferUri(Collection $page)
     {
-        if ($uri = $page->get('uri')) {
-            return '/' . trim($uri, '/');
+        if ($page->has('uri')) {
+            return '/' . trim($page->get('uri'), '/');
         }
 
-        return '/' . str_replace('.yml', '.html', array_get($page, '_meta.relative_pathname'));
+        foreach ($this->config->get('scopes') as $scope => $scopeConfig) {
+            if (starts_with($page->get('path'), $scopeConfig['path']) && $scopeConfig['path'] !== '') {
+                return '/' . $this->replacePermalinkParts($scopeConfig['permalink'], $page);
+            }
+        }
+
+        return '/' . $this->replacePermalinkParts($this->config->get('scopes.default.permalink'), $page);
+    }
+
+    protected function replacePermalinkParts($permalink, $page)
+    {
+        $uri = $permalink;
+        $parts = explode('/', $permalink);
+        foreach ($parts as $part) {
+            if (starts_with($part, ':')) {
+                $replacement = $part !== ':pathname' ? str_slug(array_get($page, substr($part, 1))) : $page->get('pathname');
+                $uri = str_replace("$part", $replacement, $uri);
+            }
+        }
+
+        return trim(ends_with($uri, 'yml') ? str_replace('yml', '', $uri) : $uri, '/.') . '.html';
     }
 }

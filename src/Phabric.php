@@ -2,7 +2,7 @@
 namespace Phabric;
 
 use Phabric\Tasks\PackageManagerTasks;
-use Phabric\Tasks\StandardTasks;
+use Phabric\Tasks\RoboTasks;
 use Phabric\Tasks\ThirdPartyTasks;
 use Robo\Result;
 use SitemapPHP\Sitemap;
@@ -12,8 +12,8 @@ use Suin\RSSWriter\Item;
 
 trait Phabric
 {
-    use StandardTasks;
     use PackageManagerTasks;
+    use RoboTasks;
     use ThirdPartyTasks;
 
     public function play()
@@ -63,13 +63,13 @@ trait Phabric
     {
         $c = $this->getContainer();
         $config = $c['config'];
-        $content = $c['content']->collect();
+        $content = $c['content'];
         $fs = $c['fs'];
         $twig = $c['twig'];
 
         foreach ($content as $page) {
             $twigData = array_merge([
-                'blocks' => $c['blocks']->collect(),
+                'blocks' => $c['blocks'],
                 'categories' => $content->pluck('category')->unique()->filter(),
                 'config' => $config,
                 'content' => $content,
@@ -149,7 +149,7 @@ trait Phabric
     {
         $c = $this->getContainer();
         $config = $c['config'];
-        $content = $c['content']->collect();
+        $content = $c['content'];
         $fs = $c['fs'];
 
         $json = collect([
@@ -171,7 +171,7 @@ trait Phabric
     {
         $c = $this->getContainer();
         $config = $c['config'];
-        $content = $c['content']->collect();
+        $content = $c['content'];
         $fs = $c['fs'];
 
         // Initialise an RSS feed
@@ -216,7 +216,7 @@ trait Phabric
     {
         $c = $this->getContainer();
         $config = $c['config'];
-        $content = $c['content']->collect();
+        $content = $c['content'];
 
         // Initialise the sitemap
         $sitemap = new Sitemap($config->get('url'));

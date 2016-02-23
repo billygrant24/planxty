@@ -1,0 +1,30 @@
+# Scopes
+# ======
+# Collections of content scoped by path, attribute or any combination of the two.
+
+scopes:
+
+  default:
+    path: ''
+    permalink: :pathname
+
+  posts:
+    path: posts
+    permalink: blog/:category/:title
+    sort_by: date
+    order: desc
+    filter:
+      status: live
+
+# Taxonomies
+# ======
+
+taxonomies:
+
+  categories:
+    name: category
+    type: category
+
+  tags:
+    name: tags
+    type: tag

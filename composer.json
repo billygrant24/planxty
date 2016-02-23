@@ -24,5 +24,8 @@
     "twig/twig": "^1.24",
     "evert/sitemap-php": "^1.2",
     "suin/php-rss-writer": "^1.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.2"
   }
 }

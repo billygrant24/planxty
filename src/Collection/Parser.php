@@ -1,16 +1,17 @@
 <?php
-namespace Phabric;
+namespace Phabric\Collection;
 
 use Illuminate\Support\Collection;
 use Parsedown;
+use Phabric\Config;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Parser as Yaml;
 use Twig_Environment;
 
-trait FileParser
+trait Parser
 {
     /**
-     * @var \Illuminate\Support\Collection
+     * @var \Phabric\Config
      */
     protected $config;
 
@@ -34,7 +35,7 @@ trait FileParser
      * @return \Illuminate\Support\Collection
      * @throws \Exception
      */
-    public function parseFile(SplFileInfo $file)
+    public function parse(SplFileInfo $file)
     {
         // Load the template using the string loader
         $twigTemplate = twig_template_from_string(
@@ -50,19 +51,47 @@ trait FileParser
         );
 
         // Populate some meta fields which describe the given resource
-        $page->put('_meta', [
-            'extension' => $file->getExtension(),
-            'path' => $file->getPath(),
-            'pathname' => $file->getPathname(),
-            'relative_path' => $file->getRelativePath(),
-            'relative_pathname' => $file->getRelativePathname(),
-            'raw' => $file->getContents(),
-        ]);
+        $page->put('path', $file->getRelativePath());
+        $page->put('pathname', $file->getRelativePathname());
+        $page->put('real_path', $file->getPath());
+        $page->put('real_pathname', $file->getPathname());
 
         // Transform markdown fields to HTML
         $transformedPage = $this->transformMarkdown($page);
 
         return $transformedPage;
+    }
+
+    /**
+     * @param \Phabric\Config $config
+     */
+    public function setConfig(Config $config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @param Parsedown $markdown
+     */
+    public function setMarkdown(Parsedown $markdown)
+    {
+        $this->markdown = $markdown;
+    }
+
+    /**
+     * @param Twig_Environment $twig
+     */
+    public function setTwig(Twig_Environment $twig)
+    {
+        $this->twig = $twig;
+    }
+
+    /**
+     * @param Yaml $yaml
+     */
+    public function setYaml(Yaml $yaml)
+    {
+        $this->yaml = $yaml;
     }
 
     /**
@@ -103,37 +132,5 @@ trait FileParser
         }
 
         return $return;
-    }
-
-    /**
-     * @param Collection $config
-     */
-    public function setConfig($config)
-    {
-        $this->config = $config;
-    }
-
-    /**
-     * @param Parsedown $markdown
-     */
-    public function setMarkdown($markdown)
-    {
-        $this->markdown = $markdown;
-    }
-
-    /**
-     * @param Twig_Environment $twig
-     */
-    public function setTwig($twig)
-    {
-        $this->twig = $twig;
-    }
-
-    /**
-     * @param Yaml $yaml
-     */
-    public function setYaml($yaml)
-    {
-        $this->yaml = $yaml;
     }
 }

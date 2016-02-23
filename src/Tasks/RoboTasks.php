@@ -1,7 +1,7 @@
 <?php
 namespace Phabric\Tasks;
 
-trait StandardTasks
+trait RoboTasks
 {
     use \Robo\Task\Base\loadTasks;
     use \Robo\Task\Development\loadTasks;
