@@ -157,7 +157,7 @@ trait Phabric
         $fs->dumpFile(
             implode('/', [
                 rtrim($config->get('paths.build'), '/'),
-                trim($config->get('api.filename') . '.json', '/'),
+                trim($config->get('outputs.api'), '/'),
             ]),
             $json
         );
@@ -202,7 +202,7 @@ trait Phabric
         $fs->dumpFile(
             implode('/', [
                 rtrim($config->get('paths.build'), '/'),
-                trim($config->get('rss.filename') . '.xml', '/'),
+                trim($config->get('outputs.rss'), '/'),
             ]),
             $feed
         );
@@ -218,7 +218,7 @@ trait Phabric
         $sitemap = new Sitemap($config->get('url'));
         $sitemap
             ->setPath(rtrim($config->get('paths.build'), '/') . '/')
-            ->setFilename($config->get('sitemap.filename'));
+            ->setFilename(str_replace('.xml', '', $config->get('outputs.sitemap')));
 
         // Add each page
         foreach ($content as $page) {
