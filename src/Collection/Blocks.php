@@ -1,11 +1,10 @@
 <?php
 namespace Phabric\Collection;
 
-use Illuminate\Support\Collection;
 use Phabric\Parsing\ContentParser;
 use Pimple\Container;
 
-class Blocks extends CollectionAbstract
+class Blocks extends Collection
 {
     public function addCollections(Container $c)
     {
@@ -32,7 +31,7 @@ class Blocks extends CollectionAbstract
                     $items[$file->getBasename('.yml')] = $c['block_parser']->parse($file);
                 }
 
-                $blocks = new Collection($items);
+                $blocks = collect($items);
 
                 return $blocks;
             },

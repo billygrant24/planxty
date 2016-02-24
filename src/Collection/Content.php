@@ -1,11 +1,10 @@
 <?php
 namespace Phabric\Collection;
 
-use Illuminate\Support\Collection;
 use Phabric\Parsing\ContentParser;
 use Pimple\Container;
 
-class Content extends CollectionAbstract
+class Content extends Collection
 {
     public function getName()
     {
@@ -38,7 +37,7 @@ class Content extends CollectionAbstract
                    $items[$parsedItem->get('uri')] = $parsedItem;
                }
 
-               $content = new Collection($items);
+               $content = collect($items);
 
                foreach ($this->availableMacros($c) as $macro => $callback) {
                    $content->macro($macro, $callback);

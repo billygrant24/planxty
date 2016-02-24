@@ -4,7 +4,7 @@ namespace Phabric\Collection;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
-abstract class CollectionAbstract implements ServiceProviderInterface, CollectionProvider
+abstract class Collection implements ServiceProviderInterface, CollectionProvider
 {
     public final function register(Container $c)
     {
