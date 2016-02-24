@@ -5,7 +5,7 @@ use Illuminate\Support\Collection;
 use Phabric\Parsing\ContentParser;
 use Pimple\Container;
 
-class Content extends ProviderAbstract
+class Content extends CollectionAbstract
 {
     public function getName()
     {

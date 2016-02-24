@@ -5,7 +5,7 @@ use Illuminate\Support\Collection;
 use Phabric\Parsing\ContentParser;
 use Pimple\Container;
 
-class Blocks extends ProviderAbstract
+class Blocks extends CollectionAbstract
 {
     public function addCollections(Container $c)
     {

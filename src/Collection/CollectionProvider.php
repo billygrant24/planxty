@@ -3,7 +3,7 @@ namespace Phabric\Collection;
 
 use Pimple\Container;
 
-interface Provider
+interface CollectionProvider
 {
     public function addCollections(Container $c);
 }

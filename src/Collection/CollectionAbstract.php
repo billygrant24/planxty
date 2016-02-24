@@ -4,9 +4,9 @@ namespace Phabric\Collection;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
-abstract class ProviderAbstract implements ServiceProviderInterface, Provider
+abstract class CollectionAbstract implements ServiceProviderInterface, CollectionProvider
 {
-    public function register(Container $c)
+    public final function register(Container $c)
     {
         foreach ($this->addCollections($c) as $identifier => $collection) {
             $c["collections.$identifier"] = $collection;
