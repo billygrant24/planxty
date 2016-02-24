@@ -1,10 +1,10 @@
 <?php
-namespace Phabric;
+namespace Phabric\Configuration;
 
 use ArrayAccess;
 use Illuminate\Support\Arr;
 
-final class Config implements ArrayAccess
+final class ConfigRepository implements ArrayAccess
 {
     /**
      * All of the configuration items.
@@ -20,7 +20,7 @@ final class Config implements ArrayAccess
      */
     public function __construct(array $items = [])
     {
-        $defaultConfig = [
+        $this->items = array_merge([
             'scopes' => [
                 'default' => [
                     'path' => '',
@@ -34,29 +34,30 @@ final class Config implements ArrayAccess
                 'api' => 'index.json',
                 'rss' => 'rss.xml',
                 'sitemap' => 'sitemap.xml',
-            ]
-        ];
-
-        $this->items = array_merge($defaultConfig, $items);
+            ],
+        ], $items);
     }
 
     /**
-     * Determine if the given configuration value exists.
+     * Prepend a value onto an array configuration value.
      *
      * @param  string $key
+     * @param  mixed $value
      *
-     * @return bool
+     * @return void
      */
-    public function has($key)
+    public function prepend($key, $value)
     {
-        return Arr::has($this->items, $key);
+        $array = $this->get($key);
+        array_unshift($array, $value);
+        $this->set($key, $array);
     }
 
     /**
      * Get the specified configuration value.
      *
      * @param  string $key
-     * @param  mixed  $default
+     * @param  mixed $default
      *
      * @return mixed
      */
@@ -69,7 +70,7 @@ final class Config implements ArrayAccess
      * Set a given configuration value.
      *
      * @param  array|string $key
-     * @param  mixed        $value
+     * @param  mixed $value
      *
      * @return void
      */
@@ -85,25 +86,10 @@ final class Config implements ArrayAccess
     }
 
     /**
-     * Prepend a value onto an array configuration value.
-     *
-     * @param  string $key
-     * @param  mixed  $value
-     *
-     * @return void
-     */
-    public function prepend($key, $value)
-    {
-        $array = $this->get($key);
-        array_unshift($array, $value);
-        $this->set($key, $array);
-    }
-
-    /**
      * Push a value onto an array configuration value.
      *
      * @param  string $key
-     * @param  mixed  $value
+     * @param  mixed $value
      *
      * @return void
      */
@@ -137,6 +123,18 @@ final class Config implements ArrayAccess
     }
 
     /**
+     * Determine if the given configuration value exists.
+     *
+     * @param  string $key
+     *
+     * @return bool
+     */
+    public function has($key)
+    {
+        return Arr::has($this->items, $key);
+    }
+
+    /**
      * Get a configuration option.
      *
      * @param  string $key
@@ -152,7 +150,7 @@ final class Config implements ArrayAccess
      * Set a configuration option.
      *
      * @param  string $key
-     * @param  mixed  $value
+     * @param  mixed $value
      *
      * @return void
      */

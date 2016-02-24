@@ -1,5 +1,5 @@
 <?php
-namespace Phabric\Tasks;
+namespace Phabric\Task;
 
 trait RoboTasks
 {
@@ -14,6 +14,13 @@ trait RoboTasks
     use \Robo\Task\Vcs\loadShortcuts;
     use \Robo\Common\TaskIO;
 
-    use PackageManagerTasks;
-    use ThirdPartyTasks;
+    use \Robo\Task\Composer\loadTasks;
+    use \Robo\Task\Bower\loadTasks;
+    use \Robo\Task\Npm\loadTasks;
+
+    use \Robo\Task\Remote\loadTasks;
+    use \Robo\Task\Testing\loadTasks;
+    use \Robo\Task\ApiGen\loadTasks;
+    use \Robo\Task\Docker\loadTasks;
+    use \Robo\Task\Gulp\loadTasks;
 }

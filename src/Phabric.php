@@ -23,6 +23,11 @@ trait Phabric
             ->run();
     }
 
+    protected function getContainer()
+    {
+        return ContainerFactory::newInstance();
+    }
+
     public function listen()
     {
         $c = $this->getContainer();
@@ -227,11 +232,6 @@ trait Phabric
 
         // Finalise the generated sitemap
         $sitemap->createSitemapIndex($config->get('url') . '/', 'Today');
-    }
-
-    protected function getContainer()
-    {
-        return ContainerFactory::newInstance();
     }
 
     protected function stopOnFail($stopOnFail = true)

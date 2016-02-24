@@ -11,5 +11,6 @@ scopes:
   posts:
     path: posts
     permalink: blog/:category/:title
+    layout: post.twig
     sort_by: date
     order: desc

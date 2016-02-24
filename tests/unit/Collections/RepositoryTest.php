@@ -2,6 +2,7 @@
 namespace Phabric\Tests\Collections;
 
 use Phabric\Config;
+use Phabric\Configuration\ConfigRepository;
 use Phabric\ContainerFactory;
 use PHPUnit_Framework_TestCase;
 use Symfony\Component\Yaml\Yaml;
@@ -27,7 +28,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
         $this->container->extend('config', function ($config, $c) {
             $configFile = file_get_contents($this->workspace . '/config.yml');
 
-            return new Config(Yaml::parse($configFile));
+            return new ConfigRepository(Yaml::parse($configFile));
         });
 
         $this->container['config']->set('paths.blocks', $this->workspace . '/blocks');
@@ -51,7 +52,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
      */
     public function itCollectsContent()
     {
-        $parsedContent = $this->container['content'];
+        $parsedContent = $this->container['content']->scope('posts');
 
         $this->assertEquals(3, $parsedContent->count());
         $this->assertArrayHasKey('/content_1.html', $parsedContent);

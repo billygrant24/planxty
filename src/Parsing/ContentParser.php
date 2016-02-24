@@ -1,13 +1,12 @@
 <?php
-namespace Phabric\Collection\Content;
+namespace Phabric\Parsing;
 
 use Illuminate\Support\Collection;
-use Phabric\Collection\Parser as ParserTrait;
 use Symfony\Component\Finder\SplFileInfo;
 
-final class Parser
+final class ContentParser
 {
-    use ParserTrait {
+    use Parser {
         parse as parseGeneric;
     }
 
@@ -48,11 +47,44 @@ final class Parser
     /**
      * @param \Illuminate\Support\Collection $item
      *
-     * @return int
+     * @return string
      */
-    private function parseDateString(Collection $item)
+    private function inferUri(Collection $item)
     {
-        return strtotime($item->get('date', 'now'));
+        if ($item->has('uri')) {
+            return '/' . trim($item->get('uri'), '/');
+        }
+
+        $scope = $item->get('scope');
+        $permalink = $this->config->get("scopes.$scope.permalink");
+
+        return '/' . $this->replacePermalinkParts($permalink, $item);
+    }
+
+    /**
+     * @param string $permalink
+     * @param \Illuminate\Support\Collection $item
+     *
+     * @return string
+     */
+    private function replacePermalinkParts($permalink, Collection $item)
+    {
+        $uri = $permalink;
+        $parts = explode('/', $permalink);
+
+        foreach ($parts as $part) {
+            if (starts_with($part, ':')) {
+                $replacement = $part !== ':pathname'
+                    ? str_slug(array_get($item, substr($part, 1)))
+                    : $item->get('pathname');
+
+                $uri = str_replace($part, $replacement, $uri);
+            }
+        }
+
+        $uri = trim(ends_with($uri, 'yml') ? str_replace('yml', '', $uri) : $uri, '/.');
+
+        return $uri . '.html';
     }
 
     /**
@@ -78,43 +110,10 @@ final class Parser
     /**
      * @param \Illuminate\Support\Collection $item
      *
-     * @return string
+     * @return int
      */
-    private function inferUri(Collection $item)
+    private function parseDateString(Collection $item)
     {
-        if ($item->has('uri')) {
-            return '/' . trim($item->get('uri'), '/');
-        }
-
-        $scope = $item->get('scope');
-        $permalink = $this->config->get("scopes.$scope.permalink");
-
-        return '/' . $this->replacePermalinkParts($permalink, $item);
-    }
-
-    /**
-     * @param string                         $permalink
-     * @param \Illuminate\Support\Collection $item
-     *
-     * @return string
-     */
-    private function replacePermalinkParts($permalink, Collection $item)
-    {
-        $uri = $permalink;
-        $parts = explode('/', $permalink);
-
-        foreach ($parts as $part) {
-            if (starts_with($part, ':')) {
-                $replacement = $part !== ':pathname'
-                    ? str_slug(array_get($item, substr($part, 1)))
-                    : $item->get('pathname');
-
-                $uri = str_replace($part, $replacement, $uri);
-            }
-        }
-
-        $uri = trim(ends_with($uri, 'yml') ? str_replace('yml', '', $uri) : $uri, '/.');
-
-        return $uri . '.html';
+        return strtotime($item->get('date', 'now'));
     }
 }

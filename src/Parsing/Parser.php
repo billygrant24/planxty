@@ -1,9 +1,9 @@
 <?php
-namespace Phabric\Collection;
+namespace Phabric\Parsing;
 
 use Illuminate\Support\Collection;
 use Parsedown;
-use Phabric\Config;
+use Phabric\Configuration\ConfigRepository as ConfigRepository;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Parser as Yaml;
 use Twig_Environment;
@@ -63,38 +63,6 @@ trait Parser
     }
 
     /**
-     * @param \Phabric\Config $config
-     */
-    public function setConfig(Config $config)
-    {
-        $this->config = $config;
-    }
-
-    /**
-     * @param Parsedown $markdown
-     */
-    public function setMarkdown(Parsedown $markdown)
-    {
-        $this->markdown = $markdown;
-    }
-
-    /**
-     * @param Twig_Environment $twig
-     */
-    public function setTwig(Twig_Environment $twig)
-    {
-        $this->twig = $twig;
-    }
-
-    /**
-     * @param Yaml $yaml
-     */
-    public function setYaml(Yaml $yaml)
-    {
-        $this->yaml = $yaml;
-    }
-
-    /**
      * @param \Illuminate\Support\Collection $page
      * @return \Illuminate\Support\Collection
      */
@@ -132,5 +100,37 @@ trait Parser
         }
 
         return $return;
+    }
+
+    /**
+     * @param \Phabric\Configuration\ConfigRepository $config
+     */
+    public function setConfig(ConfigRepository $config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @param Parsedown $markdown
+     */
+    public function setMarkdown(Parsedown $markdown)
+    {
+        $this->markdown = $markdown;
+    }
+
+    /**
+     * @param Twig_Environment $twig
+     */
+    public function setTwig(Twig_Environment $twig)
+    {
+        $this->twig = $twig;
+    }
+
+    /**
+     * @param Yaml $yaml
+     */
+    public function setYaml(Yaml $yaml)
+    {
+        $this->yaml = $yaml;
     }
 }
