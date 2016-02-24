@@ -1,7 +1,7 @@
 <?php
 namespace Phabric;
 
-use Phabric\Tasks\RoboTasks;
+use Phabric\Task\RoboTasks;
 use Robo\Result;
 use SitemapPHP\Sitemap;
 use Suin\RSSWriter\Channel;
