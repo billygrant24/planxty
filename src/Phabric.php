@@ -75,7 +75,8 @@ abstract class Phabric extends Tasks
                 'content' => $content,
                 'blocks' => $this->c['block_collector'],
                 'taxonomy' => $this->c['taxonomy_collector'],
-            ], compact('this'));
+                'this' => $page,
+            ]);
 
             if ( ! $page->has('pagination')) {
                 $fs->dumpFile(
