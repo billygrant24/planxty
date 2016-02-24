@@ -86,10 +86,11 @@ abstract class Phabric extends Tasks
             } else {
                 $pagination = collect($page->get('pagination'));
 
-                $type = $pagination->get('from');
+                $scope = $pagination->get('scope', 'default');
                 $size = $pagination->get('size', null);
 
-                $scopedContent = $content->where('type', $type);
+                $scopedContent = $content->scope($scope);
+
                 $contentCount = $scopedContent->count();
                 $pageCount = ceil($contentCount / ($size ? $size : 1));
 

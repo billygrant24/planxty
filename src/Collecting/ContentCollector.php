@@ -40,8 +40,9 @@ final class ContentCollector
 
             $scopedItems = $this->where('scope', $scope);
 
-            $sort = $scopes->get("$scope.sort");
-            $order = $scopes->get("$scope.order", 'DESC');
+            $scope = collect($scopes->get($scope));
+            $sort = $scope->get("sort");
+            $order = $scope->get("order", 'DESC');
 
             return $scopedItems->sortBy($sort, null, strtoupper($order) === 'DESC');
         });
