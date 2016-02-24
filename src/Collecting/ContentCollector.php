@@ -1,13 +1,52 @@
 <?php
-namespace Phabric\Parsing;
+namespace Phabric\Collecting;
 
 use Illuminate\Support\Collection;
+use Phabric\Parsing\Parser;
+use Pimple\Container;
 use Symfony\Component\Finder\SplFileInfo;
 
-final class ContentParser
+final class ContentCollector
 {
-    use Parser {
-        parse as parseGeneric;
+    use Parser;
+
+    public function __construct(Container $c)
+    {
+        $this->config = $c['config'];
+        $this->finder = $c['finder'];
+        $this->markdown = $c['markdown'];
+        $this->twig = $c['twig'];
+        $this->yaml = $c['yaml'];
+    }
+
+    public function collect()
+    {
+        $path = $this->config->get('paths.content');
+
+        $this->finder->files()->in($path)->name('*.yml');
+
+        $items = [];
+        foreach ($this->finder as $file) {
+            $items[] = $this->parseContent($file);
+        }
+
+        $content = new Collection($items);
+
+        $scopes = collect($this->config->get('scopes'));
+        $content->macro('scope', function ($scope) use ($scopes) {
+            if ( ! $scopes->has($scope)) {
+                return $this;
+            }
+
+            $scopedItems = $this->where('scope', $scope);
+
+            $sort = $scopes->get("$scope.sort");
+            $order = $scopes->get("$scope.order", 'DESC');
+
+            return $scopedItems->sortBy($sort, null, strtoupper($order) === 'DESC');
+        });
+
+        return $content;
     }
 
     /**
@@ -15,9 +54,9 @@ final class ContentParser
      * @return \Illuminate\Support\Collection
      * @throws \Exception
      */
-    public function parse(SplFileInfo $file)
+    public function parseContent(SplFileInfo $file)
     {
-        $item = $this->parseGeneric($file);
+        $item = $this->parse($file);
 
         // Parse or infer defaults on some key fields
         $item->put('scope', $this->inferScope($item));

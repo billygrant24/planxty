@@ -39,11 +39,9 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
      */
     public function itCollectsBlocks()
     {
-        $parsedBlocks = $this->container['collections.blocks'];
+        $parsedBlocks = $this->container['block_collector'];
 
         $this->assertEquals(2, $parsedBlocks->count());
-        $this->assertArrayHasKey('block_1', $parsedBlocks);
-        $this->assertArrayHasKey('block_2', $parsedBlocks);
     }
 
     /**
@@ -51,13 +49,9 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
      */
     public function itCollectsContent()
     {
-        $parsedContent = $this->container['collections.content']->scope('posts');
-
+        $parsedContent = $this->container['content_collector'];
 
         $this->assertEquals(3, $parsedContent->count());
-        $this->assertArrayHasKey('/content_1.html', $parsedContent);
-        $this->assertArrayHasKey('/blog/mobile-development/hello-world.html', $parsedContent);
-        $this->assertArrayHasKey('/our-team/nick-swan.html', $parsedContent);
 
         $parsedContent->each(function ($item) {
             $this->assertArrayHasKey('body', $item);

@@ -1,9 +1,9 @@
 <?php
 namespace Phabric;
 
-use Phabric\Collection\Blocks;
-use Phabric\Collection\Content;
-use Illuminate\Support\Collection;
+use Phabric\Collecting\BlockCollector;
+use Phabric\Collecting\ContentCollector;
+use Phabric\Collecting\TaxonomyCollector;
 use Parsedown;
 use Pimple\Container;
 use Symfony\Component\Filesystem\Filesystem;
@@ -66,12 +66,23 @@ final class ContainerFactory
             return new Finder();
         });
 
-        $container['collections'] = function ($c) {
-            return new Collection();
+        $container['block_collector'] = function ($c) {
+            $blocks = new BlockCollector($c);
+
+            return $blocks->collect();
         };
 
-        $container->register(new Content());
-        $container->register(new Blocks());
+        $container['taxonomy_collector'] = function ($c) {
+            $taxonomies = new TaxonomyCollector($c);
+
+            return $taxonomies->collect();
+        };
+
+        $container['content_collector'] = function ($c) {
+            $content = new ContentCollector($c);
+
+            return $content->collect();
+        };
 
         return $container;
     }

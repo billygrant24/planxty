@@ -1,21 +1,27 @@
 <?php
 namespace Phabric;
 
-use Phabric\Task\RoboTasks;
-use Robo\Result;
+use Robo\Tasks;
 use SitemapPHP\Sitemap;
 use Suin\RSSWriter\Channel;
 use Suin\RSSWriter\Feed;
 use Suin\RSSWriter\Item;
 
-trait Phabric
+class Phabric extends Tasks
 {
-    use RoboTasks;
+    /**
+     * @var \Pimple\Container
+     */
+    protected $c;
+
+    public function __construct()
+    {
+        $this->c = ContainerFactory::newInstance();
+    }
 
     public function play()
     {
-        $c = $this->getContainer();
-        $config = $c['config'];
+        $config = $this->c['config'];
 
         $this
             ->taskServer(3000)
@@ -23,15 +29,9 @@ trait Phabric
             ->run();
     }
 
-    protected function getContainer()
-    {
-        return ContainerFactory::newInstance();
-    }
-
     public function listen()
     {
-        $c = $this->getContainer();
-        $config = $c['config'];
+        $config = $this->c['config'];
 
         $this
             ->taskWatch()
@@ -39,7 +39,7 @@ trait Phabric
                 $config->get('paths.assets'),
                 $config->get('paths.content'),
                 $config->get('paths.layouts'),
-            ], function () use ($config) {
+            ], function () {
                 $this->say('Changes detected');
                 $this->compose(null);
             })
@@ -48,9 +48,8 @@ trait Phabric
 
     public function clean()
     {
-        $c = $this->getContainer();
-        $config = $c['config'];
-        $fs = $c['fs'];
+        $config = $this->c['config'];
+        $fs = $this->c['fs'];
 
         if ($fs->exists($config->get('paths.build'))) {
             $this->taskCleanDir($config->get('paths.build'))->run();
@@ -62,20 +61,18 @@ trait Phabric
 
     public function composeHtml()
     {
-        $c = $this->getContainer();
-        $config = $c['config'];
-        $content = $c['collections.content'];
-        $fs = $c['fs'];
-        $twig = $c['twig'];
+        $config = $this->c['config'];
+        $content = $this->c['content_collector'];
+        $fs = $this->c['fs'];
+        $twig = $this->c['twig'];
 
         foreach ($content as $page) {
             $twigData = array_merge([
-                'blocks' => $c['collections.blocks'],
-                'categories' => $content->pluck('category')->unique()->filter(),
                 'config' => $config,
                 'content' => $content,
-                'tags' => $content->pluck('tags')->flatten()->values()->unique()->filter(),
-            ], compact('page'));
+                'blocks' => $this->c['block_collector'],
+                'taxonomy' => $this->c['taxonomy_collector'],
+            ], compact('this'));
 
             if ( ! $page->has('pagination')) {
                 $fs->dumpFile(
@@ -127,10 +124,9 @@ trait Phabric
 
     public function composeAssets()
     {
-        $c = $this->getContainer();
-        $config = $c['config'];
-        $finder = $c['finder'];
-        $fs = $c['fs'];
+        $config = $this->c['config'];
+        $finder = $this->c['finder'];
+        $fs = $this->c['fs'];
 
         $finder->files()->in($config->get('paths.assets'));
 
@@ -148,15 +144,12 @@ trait Phabric
 
     public function composeApi()
     {
-        $c = $this->getContainer();
-        $config = $c['config'];
-        $content = $c['collections.content'];
-        $fs = $c['fs'];
+        $config = $this->c['config'];
+        $fs = $this->c['fs'];
 
         $json = collect([
-            'content' => $content->toArray(),
-            'categories' => $content->pluck('category')->unique()->filter(),
-            'tags' => $content->pluck('tags')->flatten()->values()->unique()->filter(),
+            'content' => $this->c['content_collector']->toArray(),
+            'taxonomy' => $this->c['taxonomy_collector']->toArray(),
         ])->toJson();
 
         $fs->dumpFile(
@@ -170,10 +163,9 @@ trait Phabric
 
     public function composeRss()
     {
-        $c = $this->getContainer();
-        $config = $c['config'];
-        $content = $c['collections.content'];
-        $fs = $c['fs'];
+        $config = $this->c['config'];
+        $content = $this->c['content_collector'];
+        $fs = $this->c['fs'];
 
         // Initialise an RSS feed
         $feed = new Feed();
@@ -215,9 +207,8 @@ trait Phabric
 
     public function composeSitemap()
     {
-        $c = $this->getContainer();
-        $config = $c['config'];
-        $content = $c['collections.content'];
+        $config = $this->c['config'];
+        $content = $this->c['content_collector'];
 
         // Initialise the sitemap
         $sitemap = new Sitemap($config->get('url'));
@@ -232,10 +223,5 @@ trait Phabric
 
         // Finalise the generated sitemap
         $sitemap->createSitemapIndex($config->get('url') . '/', 'Today');
-    }
-
-    protected function stopOnFail($stopOnFail = true)
-    {
-        Result::$stopOnFail = $stopOnFail;
     }
 }
