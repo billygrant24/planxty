@@ -1,14 +1,17 @@
 <?php
 namespace Phabric;
 
+use Robo\Common\TaskIO;
 use Robo\Tasks;
 use SitemapPHP\Sitemap;
 use Suin\RSSWriter\Channel;
 use Suin\RSSWriter\Feed;
 use Suin\RSSWriter\Item;
 
-class Phabric extends Tasks
+abstract class Phabric extends Tasks
 {
+    use TaskIO;
+
     /**
      * @var \Pimple\Container
      */

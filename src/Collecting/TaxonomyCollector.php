@@ -17,13 +17,16 @@ final class TaxonomyCollector
         $items = [];
         $taxonomies = $this->config->get('taxonomies');
 
-        collect($taxonomies)->each(function ($taxonomy, $name) {
-            if ($taxonomy['type'] === 'category') {
-                $item[$name] = $this->content->pluck($name)->unique()->filter();
+        collect($taxonomies)->each(function ($taxonomy, $key) use (&$items) {
+            $name = $taxonomy['name'];
+            $type = $taxonomy['type'];
+
+            if ($type === 'category') {
+                $items[$key] = $this->content->pluck($name)->filter()->unique()->values();
             }
 
-            if ($taxonomy['type'] === 'tag') {
-                $item[$name] = $this->content->pluck($name)->flatten()->values()->unique()->filter();
+            if ($type === 'tag') {
+                $items[$key] = $this->content->pluck($name)->flatten()->filter()->unique()->values();
             }
         });
 
