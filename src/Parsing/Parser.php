@@ -3,7 +3,7 @@ namespace Phabric\Parsing;
 
 use Illuminate\Support\Collection;
 use Parsedown;
-use Phabric\Configuration\ConfigRepository as ConfigRepository;
+use Phabric\Config;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Parser as Yaml;
 use Twig_Environment;
@@ -103,9 +103,9 @@ trait Parser
     }
 
     /**
-     * @param \Phabric\Configuration\ConfigRepository $config
+     * @param \Phabric\Config $config
      */
-    public function setConfig(ConfigRepository $config)
+    public function setConfig(Config $config)
     {
         $this->config = $config;
     }

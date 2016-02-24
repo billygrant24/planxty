@@ -1,10 +1,10 @@
 <?php
-namespace Phabric\Configuration;
+namespace Phabric;
 
 use ArrayAccess;
 use Illuminate\Support\Arr;
 
-final class ConfigRepository implements ArrayAccess
+final class Config implements ArrayAccess
 {
     /**
      * All of the configuration items.

@@ -1,17 +1,18 @@
 <?php
-namespace Phabric\Provider;
+namespace Phabric\Collection;
 
 use Illuminate\Support\Collection;
 use Phabric\Parsing\ContentParser;
 use Pimple\Container;
-use Pimple\ServiceProviderInterface;
 
-class ContentProvider implements ServiceProviderInterface
+class Content extends ProviderAbstract
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function register(Container $c)
+    public function getName()
+    {
+        return 'content';
+    }
+
+    public function addCollections(Container $c)
     {
         $c['content_parser'] = function ($c) {
             $parser = new ContentParser();
@@ -24,29 +25,31 @@ class ContentProvider implements ServiceProviderInterface
             return $parser;
         };
 
-        $c['content'] = function ($c) {
-            $path = $c['config']->get('paths.content');
+       return [
+           'content' => function ($c) {
+               $path = $c['config']->get('paths.content');
 
-            $finder = $c['finder'];
-            $finder->files()->in($path)->name('*.yml');
+               $finder = $c['finder'];
+               $finder->files()->in($path)->name('*.yml');
 
-            $items = [];
-            foreach ($finder as $file) {
-                $parsedItem = $c['content_parser']->parse($file);
-                $items[$parsedItem->get('uri')] = $parsedItem;
-            }
+               $items = [];
+               foreach ($finder as $file) {
+                   $parsedItem = $c['content_parser']->parse($file);
+                   $items[$parsedItem->get('uri')] = $parsedItem;
+               }
 
-            $content = new Collection($items);
+               $content = new Collection($items);
 
-            foreach ($this->collectionMacros($c) as $macro => $callback) {
-                $content->macro($macro, $callback);
-            }
+               foreach ($this->availableMacros($c) as $macro => $callback) {
+                   $content->macro($macro, $callback);
+               }
 
-            return $content;
-        };
+               return $content;
+           },
+       ];
     }
 
-    private function collectionMacros($c)
+    private function availableMacros($c)
     {
         $scopes = collect($c['config']->get('scope'));
 
