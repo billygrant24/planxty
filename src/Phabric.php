@@ -94,10 +94,14 @@ abstract class Phabric extends Tasks
                 $pageCount = ceil($contentCount / ($size ? $size : 1));
 
                 $getPagedPath = function ($pageNumber) use ($page) {
-                    $uri = $page->get('uri');
+                    $uri = $page->get('canonical_uri');
 
-                    return $pageNumber > 1 ? str_replace('.html', '-' . $pageNumber . '.html', $uri) : $uri;
+                    return $pageNumber > 1
+                        ? str_replace('.html', '-' . $pageNumber . '.html', $uri)
+                        : $uri;
                 };
+
+                $page->put('canonical_uri', $page->get('uri'));
 
                 for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
                     $page->put('uri', $getPagedPath($pageNumber));
@@ -108,7 +112,7 @@ abstract class Phabric extends Tasks
                     $pagination->put('next', $pageNumber < $pageCount ? $pageNumber + 1 : null);
                     $pagination->put('next_uri', $pageNumber < $pageCount ? $getPagedPath($pageNumber + 1) : null);
                     $pagination->put('previous', $pageNumber > 1 ? $pageNumber - 1 : null);
-                    $pagination->put('previous_uri', $pageNumber > 1 ? $getPagedPath($pageNumber - 1) : null);
+                    $pagination->put('previous_uri', $pageNumber > 1 ? $getPagedPath($pageNumber - 1) : $page->get('uri'));
                     $pagination->put('first', 1);
                     $pagination->put('first_uri', $page->get('uri'));
                     $pagination->put('last', $pageCount);
