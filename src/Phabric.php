@@ -64,13 +64,13 @@ trait Phabric
     {
         $c = $this->getContainer();
         $config = $c['config'];
-        $content = $c['content'];
+        $content = $c['collections.content'];
         $fs = $c['fs'];
         $twig = $c['twig'];
 
         foreach ($content as $page) {
             $twigData = array_merge([
-                'blocks' => $c['blocks'],
+                'blocks' => $c['collections.blocks'],
                 'categories' => $content->pluck('category')->unique()->filter(),
                 'config' => $config,
                 'content' => $content,
@@ -150,7 +150,7 @@ trait Phabric
     {
         $c = $this->getContainer();
         $config = $c['config'];
-        $content = $c['content'];
+        $content = $c['collections.content'];
         $fs = $c['fs'];
 
         $json = collect([
@@ -172,7 +172,7 @@ trait Phabric
     {
         $c = $this->getContainer();
         $config = $c['config'];
-        $content = $c['content'];
+        $content = $c['collections.content'];
         $fs = $c['fs'];
 
         // Initialise an RSS feed
@@ -217,7 +217,7 @@ trait Phabric
     {
         $c = $this->getContainer();
         $config = $c['config'];
-        $content = $c['content'];
+        $content = $c['collections.content'];
 
         // Initialise the sitemap
         $sitemap = new Sitemap($config->get('url'));
