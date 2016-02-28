@@ -44,7 +44,7 @@ final class Paginate
         $url = $item['canonical_url'];
 
         return $page > 1
-            ? str_replace('.html', '-p' . $page . '.html', $url)
+            ? str_replace('.html', '-' . $page . '.html', $url)
             : $url;
     }
 }

@@ -16,7 +16,7 @@ class Application extends Tasks
 
     public function __construct()
     {
-        $this->c = require getcwd() . '/bootstrap.php';
+        $this->c = require getcwd() . '/_bootstrap.php';
         $this->config = $this->c['config'];
     }
 
@@ -33,8 +33,7 @@ class Application extends Tasks
         $this
             ->taskWatch()
             ->monitor([
-                $this->config['paths.content'],
-                $this->config['paths.layouts'],
+                getcwd(),
             ], function () {
                 $this->say('Changes detected');
                 $this->buildHtml();
@@ -69,50 +68,46 @@ class Application extends Tasks
 
     public function buildHtml()
     {
-        $config = $this->config;
-        $finder = $this->c['finder'];
+        $config = $this->c['config'];
+        $storage = $this->c['storage'];
         $pipeline = $this->c['pipeline'];
 
-        return $pipeline->process(
-            $finder->files()->in($config['paths.content'])->name('*.md')
-        );
+        $pipeline->process($this->c['finder']->name('*.md'));
+
+        foreach ($this->c['finder']->notName('*.md') as $file) {
+            $storage->copy(
+                $file->getPathname(),
+                $config['paths.output'] . '/' . $file->getRelativePathname()
+            );
+        }
     }
 
     public function buildAssets()
     {
         $css = new \Assetic\Asset\AssetCollection([
-            new \Assetic\Asset\GlobAsset('assets/css/*')
+            new \Assetic\Asset\GlobAsset('css/*')
         ], [
             new \Assetic\Filter\CssMinFilter(),
         ]);
 
         $sass = new \Assetic\Asset\AssetCollection([
-            new \Assetic\Asset\GlobAsset('assets/sass/*')
+            new \Assetic\Asset\GlobAsset('_sass/*')
         ], [
             new \Assetic\Filter\ScssphpFilter(),
             new \Assetic\Filter\CssMinFilter(),
         ]);
 
         $js = new \Assetic\Asset\AssetCollection([
-            new \Assetic\Asset\FileAsset('assets/js/jquery-1.10.2.min.js'),
-            new \Assetic\Asset\FileAsset('assets/js/bootstrap.min.js'),
-            new \Assetic\Asset\FileAsset('assets/js/instantclick.min.js'),
+            new \Assetic\Asset\FileAsset('js/jquery-1.10.2.min.js'),
+            new \Assetic\Asset\FileAsset('js/bootstrap.min.js'),
+            new \Assetic\Asset\FileAsset('js/instantclick.min.js'),
         ], [
             new \Assetic\Filter\JSMinFilter(),
         ]);
 
         $config = $this->c['config'];
         $fs = $this->c['storage'];
-
-        $assetsDir = $config['paths.assets'];
         $buildDir = $config['paths.output'];
-
-        $fs->copy($assetsDir . '/js/html5shiv.js', $buildDir . '/js/html5shiv.js');
-        $fs->copy($assetsDir . '/js/modernizr-2.6.2.min.js', $buildDir . '/js/modernizr-2.6.2.min.js');
-
-        $this->taskCopyDir([
-            $assetsDir . '/fonts' => $buildDir . '/fonts',
-        ])->run();
 
         $fs->dumpFile($buildDir . '/js/vendor.min.js', $js->dump());
         $fs->dumpFile($buildDir . '/css/vendor.min.css', $css->dump());

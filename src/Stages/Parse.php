@@ -17,12 +17,10 @@ final class Parse
 
     public function __invoke($payload)
     {
-        return $payload->reject(function (SplFileInfo $item) {
-            return starts_with($item->getBasename(), '_');
-        })->transform(function ($item) {
-            return $this->parseFile($item);
-        })->transform(function ($item) {
-            return $this->parseMarkdownAttributes($item);
+        return $payload->transform(function ($item) {
+            return $this->parseMarkdownAttributes(
+                $this->parseFile($item)
+            );
         })->keyBy('permalink');
     }
 
