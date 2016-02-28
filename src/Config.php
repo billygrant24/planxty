@@ -20,22 +20,7 @@ final class Config implements ArrayAccess
      */
     public function __construct(array $items = [])
     {
-        $this->items = array_merge([
-            'scopes' => [
-                'default' => [
-                    'path' => '',
-                    'permalink' => ':pathname',
-                ],
-            ],
-            'paths' => [
-                'root' => getcwd(),
-            ],
-            'outputs' => [
-                'api' => 'index.json',
-                'rss' => 'rss.xml',
-                'sitemap' => 'sitemap.xml',
-            ],
-        ], $items);
+        $this->items = $items;
     }
 
     /**

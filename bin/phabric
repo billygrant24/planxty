@@ -1,0 +1,11 @@
+#!/usr/bin/env php
+<?php
+
+if (file_exists(getcwd().'/vendor/autoload.php')) {
+    require_once getcwd().'/vendor/autoload.php';
+} elseif (file_exists(getcwd().'/../../autoload.php')) {
+    require_once getcwd() . '/../../autoload.php';
+}
+
+$runner = new \Phabric\Runner();
+$runner->execute();
