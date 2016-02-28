@@ -1,6 +1,7 @@
 <?php
 namespace Phabric;
 
+use Pimple\Container;
 use Robo\Common\TaskIO;
 use Robo\Tasks;
 
@@ -12,20 +13,23 @@ class Application extends Tasks
      * @var \Pimple\Container
      */
     protected $c;
+
+    /**
+     * @var \Phabric\Config
+     */
     protected $config;
 
     public function __construct()
     {
-        $this->c = require getcwd() . '/_bootstrap.php';
+        $this->c = new Container();
+        $this->c->register(new ServiceProvider());
+
         $this->config = $this->c['config'];
     }
 
     public function serve()
     {
-        $this
-            ->taskServer(3000)
-            ->dir($this->config['paths.output'])
-            ->run();
+        $this->taskServer(3000)->dir($this->config['paths.output'])->run();
     }
 
     public function watch()
@@ -33,7 +37,8 @@ class Application extends Tasks
         $this
             ->taskWatch()
             ->monitor([
-                getcwd(),
+                $this->config['paths.content'],
+                $this->config['paths.layouts'],
             ], function () {
                 $this->say('Changes detected');
                 $this->buildHtml();
@@ -72,10 +77,10 @@ class Application extends Tasks
         $storage = $this->c['storage'];
         $pipeline = $this->c['pipeline'];
 
-        $pipeline->process($this->c['finder']->name('*.md'));
+        $pipeline->process($this->c['finder']->in('_content')->name('*.md'));
 
         foreach ($this->c['finder']->notName('*.md') as $file) {
-            $storage->copy(
+            $storage->symlink(
                 $file->getPathname(),
                 $config['paths.output'] . '/' . $file->getRelativePathname()
             );
