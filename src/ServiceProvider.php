@@ -1,10 +1,11 @@
 <?php
 namespace Phabric;
 
+use Dotenv\Dotenv;
 use League\Pipeline\Pipeline;
 use League\Plates\Engine;
 use Mni\FrontYAML\Parser;
-use Phabric\Pipelines\SimpleBuild;
+use Phabric\Pipelines\BuildPipeline;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -21,6 +22,10 @@ final class ServiceProvider implements ServiceProviderInterface
                     include getcwd() . '/_config.php'
                 )
             );
+        };
+
+        $container['env'] = function () {
+            return new Dotenv(getcwd(), '.env');
         };
 
         $container['finder'] = $container->factory(function ($c) {
@@ -43,10 +48,10 @@ final class ServiceProvider implements ServiceProviderInterface
         };
 
         $container['pipeline'] = $container->factory(function ($c) {
-            $builder = new SimpleBuild();
-            $builder->setContainer($c);
+            $build = new BuildPipeline();
+            $build->setContainer($c);
 
-            return (new Pipeline())->pipe($builder);
+            return (new Pipeline())->pipe($build);
         });
 
         $container['storage'] = function () {
@@ -85,13 +90,16 @@ final class ServiceProvider implements ServiceProviderInterface
                     'type' => 'tag',
                 ],
             ],
-            'providers' => [
-                //
+            'providers' => [],
+            'pipelines' => [
+                'setup' => [],
+                'parse' => [],
+                'transform' => [],
+                'export' => [],
             ],
             'exclude' => [
                 'files' => [
                     '.env',
-                    '_bootstrap.php',
                     '_config.php',
                     'composer.json',
                     'composer.lock',
@@ -99,10 +107,12 @@ final class ServiceProvider implements ServiceProviderInterface
                     'README.md',
                 ],
                 'folders' => [
+                    '_assets',
                     '_content',
                     '_layouts',
-                    '_sass',
                     '_site',
+                    '_src',
+                    'node_modules',
                     'vendor',
                 ],
             ],

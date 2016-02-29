@@ -24,6 +24,8 @@ class Application extends Tasks
         $this->c = new Container();
         $this->c->register(new ServiceProvider());
 
+        $this->c['env']->load();
+
         $this->config = $this->c['config'];
     }
 
@@ -62,7 +64,16 @@ class Application extends Tasks
 
         $this->clean();
         $this->buildHtml();
-        $this->buildAssets();
+
+        // Install NPM dependencies
+        if ($this->c['storage']->exists(getcwd() . '/package.json')) {
+            $this->taskNpmInstall()->printed(false)->run();
+        }
+
+        // Run default Gulp task
+        if ($this->c['storage']->exists(getcwd() . '/gulpfile.js')) {
+            $this->taskGulpRun()->silent()->run();
+        }
 
         $this->printTaskSuccess('Congratulations, your build was successful!');
 
@@ -85,37 +96,5 @@ class Application extends Tasks
                 $config['paths.output'] . '/' . $file->getRelativePathname()
             );
         }
-    }
-
-    public function buildAssets()
-    {
-        $css = new \Assetic\Asset\AssetCollection([
-            new \Assetic\Asset\GlobAsset('css/*')
-        ], [
-            new \Assetic\Filter\CssMinFilter(),
-        ]);
-
-        $sass = new \Assetic\Asset\AssetCollection([
-            new \Assetic\Asset\GlobAsset('_sass/*')
-        ], [
-            new \Assetic\Filter\ScssphpFilter(),
-            new \Assetic\Filter\CssMinFilter(),
-        ]);
-
-        $js = new \Assetic\Asset\AssetCollection([
-            new \Assetic\Asset\FileAsset('js/jquery-1.10.2.min.js'),
-            new \Assetic\Asset\FileAsset('js/bootstrap.min.js'),
-            new \Assetic\Asset\FileAsset('js/instantclick.min.js'),
-        ], [
-            new \Assetic\Filter\JSMinFilter(),
-        ]);
-
-        $config = $this->c['config'];
-        $fs = $this->c['storage'];
-        $buildDir = $config['paths.output'];
-
-        $fs->dumpFile($buildDir . '/js/vendor.min.js', $js->dump());
-        $fs->dumpFile($buildDir . '/css/vendor.min.css', $css->dump());
-        $fs->dumpFile($buildDir . '/css/compiled.min.css', $sass->dump());
     }
 }
